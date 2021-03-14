@@ -41,6 +41,7 @@ endif
 #   VPATH    += additional_source_path
 #   LIBS     += -ladditional_library
 #******************************************************************************
+DEFINES += -DSOFT_SE
 
 INCLUDES += -I$(NM_SDK)/platform/console
 INCLUDES += -I./soft-se
