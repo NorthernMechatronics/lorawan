@@ -1,0 +1,14 @@
+{
+    "cmake.configureEnvironment": {
+        "APPLICATION": "${workspaceFolderBasename}",
+    },
+    "cmake.buildDirectory": "${workspaceFolder}/build/${variant:bsp}_${buildType}",
+    "cmake.buildTask": true,
+    "cmake.setBuildTypeOnMultiConfig": true,
+    "cmake.configureOnOpen": false,
+    "cmake.configureArgs": [
+        "-Wno-dev",
+        "-DCMAKE_VARIANT_BSP=${variant:bsp}",
+    ],
+    "cmake.generator": "Unix Makefiles"
+}

@@ -1,0 +1,45 @@
+{
+    "bsp": {
+        "default": "NM180100EVB",
+        "description": "BSP Selection",
+        "choices": {
+            "NM180100EVB": {
+                "short": "NM180100EVB",
+                "long": "NM180100EVB",
+                "settings": {
+                    "BSP_NM180100EVB": "ON"
+                }
+            },
+            "NM180410": {
+                "short": "NM180410",
+                "long": "NM180410",
+                "settings": {
+                    "BSP_NM180410": "ON"
+                }
+            },
+            "NM180411": {
+                "short": "NM180411",
+                "long": "NM180411",
+                "settings": {
+                    "BSP_NM180411": "ON"
+                }
+            }
+        }
+    },
+    "buildType": {
+        "default": "debug",
+        "description": "Build Type Selection",
+        "choices": {
+            "debug": {
+                "short": "debug",
+                "long": "Disable optimizations - include debug information",
+                "buildType": "Debug"
+            },
+            "release": {
+                "short": "release",
+                "long": "Optimize for speed - exclude debug information",
+                "buildType": "Release"
+            }
+        }
+    }
+}
