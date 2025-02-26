@@ -19,7 +19,6 @@ option(FEATURE_RAT_BLE_ENABLE "" OFF)
 option(FEATURE_RAT_LORAWAN_ENABLE "" ON)
 option(FEATURE_RAT_LORA_MESH_ENABLE "" OFF)
 option(FEATURE_TF_ENABLE "" OFF)
-option(FEATURE_LORAWAN_LED_DEBUG "" OFF)
 
 if (BSP_NM180100EVB)
 add_definitions(-DBSP_NM180100EVB)
@@ -132,6 +131,7 @@ if (CLI_ENABLE)
         CLI_SOURCES
         console_task.c
         application_task_cli.c
+        gpio_cli.c
         ui/led_task_cli.c
     )
 endif()

@@ -746,6 +746,7 @@ pin
     func_sel        = AM_HAL_PIN_12_GPIO
     GPinput         = true
     intdir          = both
+    pullup          = weak
 
 pin
     name            = PETAL_DEV_SD_EN
@@ -786,7 +787,7 @@ pin
     IOMnum          = 2
 
 # *****************************************************************************
-#  LDO enable - For sensors, peripherals, and LoRa radio
+#  Load switch enable for LoRa radio
 # *****************************************************************************
 pin
     name            = PETAL_CORE_nLORA_EN
@@ -795,3 +796,156 @@ pin
     drvstrength     = 2
     GPOutcfg        = pushpull
 
+# *****************************************************************************
+#  Sensor SPI IOM0 pins (BMI270).
+# *****************************************************************************
+pin
+    name            = IMU_CS
+    desc            = I/O Master 0 chip select.
+    pinnum          = 31
+    func_sel        = AM_HAL_PIN_31_NCE31
+    drvstrength     = 12
+    GPOutcfg        = pushpull
+    GPinput         = false
+    IOMnum          = 0
+    CEnum           = 0
+    CEpol           = low
+
+pin
+    name            = IMU_MISO
+    desc            = I/O Master 0 SPI MISO signal.
+    pinnum          = 6
+    func_sel        = AM_HAL_PIN_6_M0MISO
+    IOMnum          = 0
+
+pin
+    name            = IMU_MOSI
+    desc            = I/O Master 0 SPI MOSI signal.
+    pinnum          = 7
+    func_sel        = AM_HAL_PIN_7_M0MOSI
+    drvstrength     = 12
+    IOMnum          = 0
+
+pin
+    name            = IMU_SCK
+    desc            = I/O Master 0 SPI SCK signal.
+    pinnum          = 5
+    func_sel        = AM_HAL_PIN_5_M0SCK
+    drvstrength     = 12
+    IOMnum          = 0
+
+pin
+    name            = IMU_INT1
+    desc            = Interrupt 1 line for BMI270
+    pinnum          = 32
+    func_sel        = AM_HAL_PIN_32_GPIO
+    drvstrength     = 2
+    GPinput         = true
+    intdir          = both
+
+pin
+    name            = IMU_INT2
+    desc            = Interrupt 2 line for BMI270
+    pinnum          = 46
+    func_sel        = AM_HAL_PIN_46_GPIO
+    drvstrength     = 2
+    GPinput         = true
+    intdir          = hi2lo
+
+# *****************************************************************************
+#  Sensor I2C IOM1 pins (BMM350).
+# *****************************************************************************
+pin
+    name            = MAG_SDA
+    desc            = I/O Master 1 I2C SDA signal.
+    pinnum          = 9
+    func_sel        = AM_HAL_PIN_9_M1SDAWIR3
+    drvstrength     = 2
+    pullup          = 12K
+    IOMnum          = 1
+
+pin
+    name            = MAG_SCL
+    desc            = I/O Master 1 I2C SCL signal.
+    pinnum          = 8
+    func_sel        = AM_HAL_PIN_8_M1SCL
+    drvstrength     = 2
+    pullup          = 12K
+    IOMnum          = 1
+
+pin
+    name            = MAG_INT
+    desc            = Interrupt line for the BMM350
+    pinnum          = 45
+    func_sel        = AM_HAL_PIN_45_GPIO
+    drvstrength     = 2
+    GPinput         = true
+    intdir          = both
+
+# *****************************************************************************
+#  Sensor I2C IOM1 pins (BME688).
+# *****************************************************************************
+pin
+    name            = GAS_SDA
+    desc            = I/O Master 1 I2C SDA signal.
+    pinnum          = 9
+    func_sel        = AM_HAL_PIN_9_M1SDAWIR3
+    drvstrength     = 12
+    IOMnum          = 1
+
+pin
+    name            = GAS_SCL
+    desc            = I/O Master 1 I2C SCL signal.
+    pinnum          = 8
+    func_sel        = AM_HAL_PIN_8_M1SCL
+    drvstrength     = 12
+    IOMnum          = 1
+
+# *****************************************************************************
+#  Battery Charger I2C IOM5 pins (BQ2515X).
+# *****************************************************************************
+pin
+    name            = BATT_CHR_SDA
+    desc            = I/O Master 5 I2C SDA signal.
+    pinnum          = 49
+    func_sel        = AM_HAL_PIN_49_M5SDAWIR3
+    drvstrength     = 12
+    IOMnum          = 5
+
+pin
+    name            = BATT_CHR_SCL
+    desc            = I/O Master 5 I2C SCL signal.
+    pinnum          = 48
+    func_sel        = AM_HAL_PIN_48_M5SCL
+    drvstrength     = 12
+    IOMnum          = 5
+
+pin
+    name            = BATT_CHR_nLP
+    pinnum          = 4
+    func_sel        = AM_HAL_PIN_4_GPIO
+    drvstrength     = 2
+    GPOutcfg        = pushpull
+
+pin
+    name            = BATT_CHR_nCE
+    pinnum          = 24
+    func_sel        = AM_HAL_PIN_24_GPIO
+    drvstrength     = 2
+    GPOutcfg        = pushpull
+
+pin
+    name            = BATT_CHR_nINT
+    pinnum          = 33
+    func_sel        = AM_HAL_PIN_33_GPIO
+    drvstrength     = 2
+    GPinput         = true
+    intdir          = hi2lo
+
+pin
+    name            = BATT_CHR_nPG
+    pinnum          = 26
+    func_sel        = AM_HAL_PIN_26_GPIO
+    drvstrength     = 2
+    GPinput         = true
+    intdir          = both

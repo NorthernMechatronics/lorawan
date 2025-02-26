@@ -44,6 +44,8 @@
 #include "led.h"
 #include "lorawan.h"
 
+#include "gpio_cli.h"
+
 #include "application_task.h"
 #include "application_task_cli.h"
 
@@ -62,6 +64,8 @@
 #define APPLICATION_DEFAULT_LORAWAN_CLASS LORAWAN_CLASS_A
 #define APPLICATION_QUEUE_MAX_SIZE        (10)
 #define APPLICATION_RX_BUFFER_MAX_SIZE    (256)
+
+#define LORAWAN_PM_ENABLE   1
 
 typedef enum
 {
@@ -87,6 +91,7 @@ static volatile uint32_t lorawan_joining;
 
 static TaskHandle_t application_task_handle;
 static QueueHandle_t application_queue_handle;
+static uint32_t application_led_handle;
 
 static void on_lorawan_join_request(LmHandlerJoinParams_t *params)
 {
@@ -102,7 +107,11 @@ static void on_lorawan_join_request(LmHandlerJoinParams_t *params)
         lorawan_class_set(APPLICATION_DEFAULT_LORAWAN_CLASS);
         lorawan_request_time_sync();
 
-        led_command_t command = { .ui32Id = LED_COMMAND_PULSE2, .ui32Repeat = 1 };
+        led_command_t command = {
+            .ui32Handle = application_led_handle,
+            .ui32Id = LED_EFFECT_PULSE2,
+            .ui32Repeat = 1
+        };
         led_send(&command);
     }
 }
@@ -145,13 +154,21 @@ static void on_lorawan_mlme_request(LoRaMacStatus_t status, MlmeReq_t *mlme, Tim
     {
         if (status == LORAMAC_STATUS_DUTYCYCLE_RESTRICTED)
         {
-            led_command_t command = { .ui32Id = LED_COMMAND_PULSE1, .ui32Repeat = 1 };
+            led_command_t command = {
+                .ui32Handle = application_led_handle,
+                .ui32Id = LED_EFFECT_PULSE1,
+                .ui32Repeat = 1
+            };
             led_send(&command);
             lorawan_joining = 0;
         }
         else
         {
-            led_command_t command = { .ui32Id = LED_COMMAND_BREATHING, .ui32Repeat = 0 };
+            led_command_t command = {
+                .ui32Handle = application_led_handle,
+                .ui32Id = LED_EFFECT_BREATHING,
+                .ui32Repeat = 0
+            };
             led_send(&command);
             lorawan_joining = 1;
         }
@@ -182,6 +199,11 @@ static void on_button_pressed(void)
     xQueueSend(application_queue_handle, &msg, pdMS_TO_TICKS(100));
 }
 
+static void on_led_ctimer(void)
+{
+    led_interrupt_service(application_led_handle);
+}
+
 static void process_downlink_packet(void)
 {
     am_util_stdio_printf("\n\rReceived Data\n\r");
@@ -204,9 +226,11 @@ static void process_downlink_packet(void)
     am_util_stdio_printf("\n\r");
 
     // blink the LED to indicate receive
-    led_command_t command;
-    command.ui32Id = LED_COMMAND_PULSE2;
-    command.ui32Repeat = 1;
+    led_command_t command = {
+        .ui32Handle = application_led_handle,
+        .ui32Id = LED_EFFECT_PULSE2,
+        .ui32Repeat = 1,
+    };
     led_send(&command);
 }
 
@@ -227,7 +251,7 @@ static void setup_button(void)
     button_config(&handle, AM_BSP_GPIO_BUTTON0, g_AM_BSP_GPIO_BUTTON0, 1);
     
     // The following register a single short press sequence to the button.
-    // Other press sequence are possible.  For example, a two presses sequence
+    // Other press sequences are possible.  For example, a two presses sequence
     // with a short press first followed by a long press would be
     // 
     // button_sequence_register(handle, 2, 0b10, on_button_pressed);
@@ -246,9 +270,10 @@ static void setup_led(void)
         .ui32Interrupt = APPLICATION_LED_TIMER_INTERRUPT,
         .ui32ActiveLow    = 0,
         .ui32Pin       = APPLICATION_LED,
+        .pfnInterruptService = on_led_ctimer,
     };
 
-    led_config(&led_cfg);
+    led_config(&application_led_handle, &led_cfg);
 }
 
 static void setup_lorawan(void)
@@ -273,10 +298,13 @@ static void setup_lorawan(void)
                                     on_lorawan_join_request);
     lorawan_event_callback_register(LORAWAN_EVENT_RX_DATA,
                                     on_lorawan_receive);
+    
+#if (LORAWAN_PM_ENABLE == 1)
     lorawan_event_callback_register(LORAWAN_EVENT_SLEEP,
                                     on_lorawan_sleep);
     lorawan_event_callback_register(LORAWAN_EVENT_WAKE,
                                     on_lorawan_wake);
+#endif
 
     // Start the LoRaWAN stack.
     // There is no need to explicitly turn on the radio,
@@ -329,6 +357,11 @@ static void application_task_loop(void)
 {
     application_message_t msg;
 
+    // Wait for 1s and then toggle the LED.  Change the delay to portMAX_DELAY in
+    // production for power savings if LED indicator is not used:
+    //
+    //   xQueueReceive(application_queue_handle, &msg, portMAX_DELAY)
+    //
     if (xQueueReceive(application_queue_handle, &msg, pdMS_TO_TICKS(1000)) == pdPASS)
     {
         switch (msg)
@@ -346,7 +379,7 @@ static void application_task_loop(void)
         }
     }
 
-    if (led_status_get() == LED_STATUS_IDLE)
+    if (led_status_get(application_led_handle) == LED_STATUS_IDLE)
     {
         am_hal_gpio_state_write(AM_BSP_GPIO_LED1, AM_HAL_GPIO_OUTPUT_TOGGLE);
     }
@@ -355,6 +388,7 @@ static void application_task_loop(void)
 static void application_task(void *parameter)
 {
 #if defined(CLI_ENABLE)
+    gpio_cli_register();
     application_task_cli_register();
 #endif
     application_task_setup();

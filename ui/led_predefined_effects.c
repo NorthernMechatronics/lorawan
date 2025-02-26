@@ -34,7 +34,7 @@
 #include "led_predefined_effects.h"
 
 #define LED_EFFECT_PERIOD_BREATHING     (128)
-const led_effect_t led_effect_breathing = {
+const led_sequence_t led_effect_breathing = {
     .ui32Clock = AM_HAL_CTIMER_XT_DIV4,
     .ui32Period = LED_EFFECT_PERIOD_BREATHING,
     .pui8Sequence = {
@@ -58,7 +58,7 @@ const led_effect_t led_effect_breathing = {
 };
 
 #define LED_EFFECT_PERIOD_PULSE1        (16)
-const led_effect_t led_effect_pulse1 = {
+const led_sequence_t led_effect_pulse1 = {
     .ui32Clock = AM_HAL_CTIMER_XT_256HZ,
     .ui32Period = LED_EFFECT_PERIOD_PULSE1,
     .pui8Sequence = {
@@ -68,7 +68,7 @@ const led_effect_t led_effect_pulse1 = {
 };
 
 #define LED_EFFECT_PERIOD_PULSE2        (16)
-const led_effect_t led_effect_pulse2 = {
+const led_sequence_t led_effect_pulse2 = {
     .ui32Clock = AM_HAL_CTIMER_XT_256HZ,
     .ui32Period = LED_EFFECT_PERIOD_PULSE2,
     .pui8Sequence = {
@@ -78,7 +78,7 @@ const led_effect_t led_effect_pulse2 = {
 };
 
 #define LED_EFFECT_PERIOD_PULSE3        (20)
-const led_effect_t led_effect_pulse3 = {
+const led_sequence_t led_effect_pulse3 = {
     .ui32Clock = AM_HAL_CTIMER_XT_256HZ,
     .ui32Period = LED_EFFECT_PERIOD_PULSE3,
     .pui8Sequence = {
@@ -89,7 +89,7 @@ const led_effect_t led_effect_pulse3 = {
 };
 
 #define LED_EFFECT_PERIOD_SOS           (64)
-const led_effect_t led_effect_sos = {
+const led_sequence_t led_effect_sos = {
     .ui32Clock = AM_HAL_CTIMER_LFRC_512HZ,
     .ui32Period = LED_EFFECT_PERIOD_SOS,
     .pui8Sequence = {

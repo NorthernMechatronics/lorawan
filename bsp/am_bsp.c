@@ -651,6 +651,7 @@ am_bsp_uart_printf_disable(void)
     am_hal_gpio_pinconfig(AM_BSP_GPIO_COM_UART_TX, g_AM_HAL_GPIO_DISABLE);
     am_hal_gpio_pinconfig(AM_BSP_GPIO_COM_UART_RX, g_AM_HAL_GPIO_DISABLE);
 
+    g_sCOMUART = NULL;
 } // am_bsp_uart_printf_disable()
 
 #ifndef AM_BSP_DISABLE_BUFFERED_UART

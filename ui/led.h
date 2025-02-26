@@ -38,30 +38,35 @@
 extern "C" {
 #endif
 
-#define LED_COMMAND_OFF         (1000)
-#define LED_COMMAND_ON          (1001)
-#define LED_COMMAND_IDLE        (1002)
+#define LED_NUM_MAX            (3)
+
+#define LED_EFFECT_OFF         (1000)
+#define LED_EFFECT_ON          (1001)
+#define LED_EFFECT_IDLE        (1002)
 
 /**
  * @brief Predefined LED effects.
  * 
  */
-enum led_command_e {
-    LED_COMMAND_BREATHING = 0,
-    LED_COMMAND_PULSE1,
-    LED_COMMAND_PULSE2,
-    LED_COMMAND_PULSE3,
-    LED_COMMAND_SOS,
-    LED_COMMAND_MAX,
-};
+typedef enum led_effect_e {
+    LED_EFFECT_BREATHING = 0,
+    LED_EFFECT_PULSE1,
+    LED_EFFECT_PULSE2,
+    LED_EFFECT_PULSE3,
+    LED_EFFECT_SOS,
+    LED_EFFECT_BUILTIN_MAX,
+} led_effect_t;
 
 typedef enum {
-    LED_STATUS_OFF = 0,
+    LED_STATUS_UNCONFIGURED = 0,
+    LED_STATUS_OFF,
     LED_STATUS_IDLE,
-    LED_STATUS_ACTIVE
+    LED_STATUS_ACTIVE,
 } led_status_t;
 
-#define LED_EFFECT_MAX     (LED_COMMAND_MAX + 8)
+#define LED_EFFECT_MAX     (LED_EFFECT_BUILTIN_MAX + 8)
+
+typedef void (*led_ctimer_isr_t)(void);
 
 /**
  * @brief LED timer and GPIO parameters.
@@ -75,6 +80,8 @@ typedef enum {
  * @param ui32Interrupt CTIMER interupt mask.
  * 
  * @param ui32ActiveLow LED is active low.
+ * 
+ * @param pfnInterruptService CTIMER interrupt handler.
  */
 typedef struct {
     uint32_t ui32Number;
@@ -82,6 +89,7 @@ typedef struct {
     uint32_t ui32Pin;
     uint32_t ui32Interrupt;
     uint32_t ui32ActiveLow;
+    led_ctimer_isr_t pfnInterruptService;
 } led_config_t;
 
 /**
@@ -98,16 +106,19 @@ typedef struct {
     uint32_t  ui32Clock;
     uint32_t  ui32Period;
     const uint8_t pui8Sequence[];
-} led_effect_t;
+} led_sequence_t;
 
 /**
  * @brief LED effect to execute.
+ * 
+ * @param ui32Handle LED handle.
  * 
  * @param ui32Id The effect ID value.
  * 
  * @param ui32Repeat Number of times to repeat the effect.  Zero for indefinite.
  */
 typedef struct {
+    uint32_t ui32Handle;
     uint32_t ui32Id;
     uint32_t ui32Repeat;
 } led_command_t;
@@ -115,9 +126,22 @@ typedef struct {
 /**
  * @brief Configure LED.
  * 
+ * @param ui32Handle pointer to the LED handle.
+ * 
  * @param psConfig LED configuration.
  */
-extern void led_config(const led_config_t *psConfig);
+extern void led_config(uint32_t *pui32Handle, const led_config_t *psConfig);
+
+/**
+ * @brief Return a list of configured LED.
+ * 
+ * @param pui32HandleList pointer to the handle list of configured LEDs.
+ *
+ * @param psConfigList optional pointer to the configuration list of configured LEDs.  Set to NULL if not used.
+ *
+ * @param pui32Count length of the list.
+ */
+extern void led_config_list(uint32_t *pui32HandleList, led_config_t **psConfigList, uint32_t *pui32Length);
 
 /**
  * @brief Register an LED effect and return an identifier.
@@ -127,7 +151,7 @@ extern void led_config(const led_config_t *psConfig);
  * @param psEffect Pointer to the LED effect definition.  Cannot be defined on the stack
  *   as there is no deep-copy performed.
  */
-extern void led_register_effect(uint32_t *pui32Id, const led_effect_t *psEffect);
+extern void led_register_effect(uint32_t *pui32Id, const led_sequence_t *psEffect);
 
 /**
  * @brief Request to execute an LED effect.
@@ -139,9 +163,18 @@ extern void led_send(led_command_t *psCommand);
 /**
  * @brief Get LED task status.
  * 
- * @return 1 if LED effect is active.  0 if idle.
+ * @param ui32Handle LED handle
+ * 
+ * @return led_status_t
  */
-extern led_status_t led_status_get();
+extern led_status_t led_status_get(uint32_t ui32Handle);
+
+/**
+ * @brief To be called in the LED CTIMER interrupt
+ * 
+ * @param ui32Handle LED handle
+ */
+extern void led_interrupt_service(uint32_t ui32Handle);
 
 #ifdef __cplusplus
 }

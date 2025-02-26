@@ -1,7 +1,7 @@
 /*
  *  BSD 3-Clause License
  *
- * Copyright (c) 2024, Northern Mechatronics, Inc.
+ * Copyright (c) 2020, Northern Mechatronics, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,22 +29,16 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef _LED_PREDEFINED_EFFECTS_H_
-#define _LED_PREDEFINED_EFFECTS_H_
+#ifndef _GPIO_CLI_H_
+#define _GPIO_CLI_H_
 
-#include "led.h"
-
-#ifdef __cplusplus
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
-extern const led_sequence_t led_effect_breathing;
-extern const led_sequence_t led_effect_pulse1;
-extern const led_sequence_t led_effect_pulse2;
-extern const led_sequence_t led_effect_pulse3;
-extern const led_sequence_t led_effect_sos;
+extern void gpio_cli_register(void);
 
-#ifdef __cplusplus
+#if defined(__cplusplus)
 }
 #endif
 

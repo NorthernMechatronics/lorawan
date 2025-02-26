@@ -73,10 +73,11 @@ static void help(char *pui8OutBuffer, size_t argc, char **argv)
     am_util_stdio_printf("\r\nusage: led <command>\r\n");
     am_util_stdio_printf("\r\n");
     am_util_stdio_printf("supported commands are:\r\n");
-    am_util_stdio_printf("  off     turn off LED\r\n");
-    am_util_stdio_printf("  on      turn on LED\r\n");
-    am_util_stdio_printf("  idle    application layer controlled\r\n");
-    am_util_stdio_printf("  effect  <value> [count]\r\n");
+    am_util_stdio_printf("  list    display configured LED and handles\r\n");
+    am_util_stdio_printf("  off     <handle> turn off LED\r\n");
+    am_util_stdio_printf("  on      <handle> turn on LED\r\n");
+    am_util_stdio_printf("  idle    <handle> application layer controlled\r\n");
+    am_util_stdio_printf("  effect  <handle> <value> [count]\r\n");
     am_util_stdio_printf("          effect values are:\r\n");
     am_util_stdio_printf("            breathing\r\n");
     am_util_stdio_printf("            pulse1\r\n");
@@ -88,71 +89,150 @@ static void help(char *pui8OutBuffer, size_t argc, char **argv)
     am_util_stdio_printf("\r\n");
 }
 
+static void list(char *pui8OutBuffer, size_t argc, char **argv)
+{
+    uint32_t handle_list[LED_NUM_MAX];
+    led_config_t *config_list[LED_NUM_MAX];
+    uint32_t length;
+
+    led_config_list(handle_list, config_list, &length);
+
+    if (length == 0)
+    {
+        am_util_stdio_printf("No LED configured\r\n");
+        return;
+    }
+
+    am_util_stdio_printf("\r\n");
+    am_util_stdio_printf("LED Configuration\r\n");
+    for (uint32_t i = 0; i < length; i++)
+    {
+        am_util_stdio_printf("Handle: %3d, Pin: %3d\r\n", handle_list[i], config_list[i]->ui32Pin);
+    }
+    am_util_stdio_printf("\r\n");
+}
+
+static void off(char *pui8OutBuffer, size_t argc, char **argv)
+{
+    char *end_ptr;
+    uint32_t handle_id;
+    led_command_t command;
+
+    if (argc < 3)
+    {
+        am_util_stdio_printf("\r\nMissing LED handle id.\r\n");
+        help(pui8OutBuffer, argc, argv);
+        return;
+    }
+
+    handle_id = strtol(argv[2], &end_ptr, 10);
+    command.ui32Handle = handle_id;
+    command.ui32Id = LED_EFFECT_OFF;
+    command.ui32Repeat = 0;
+    led_send(&command);
+}
+
+static void on(char *pui8OutBuffer, size_t argc, char **argv)
+{
+    char *end_ptr;
+    uint32_t handle_id;
+    led_command_t command;
+
+    if (argc < 3)
+    {
+        am_util_stdio_printf("\r\nMissing LED handle id.\r\n");
+        help(pui8OutBuffer, argc, argv);
+        return;
+    }
+
+    handle_id = strtol(argv[2], &end_ptr, 10);
+    command.ui32Handle = handle_id;
+    command.ui32Id = LED_EFFECT_ON;
+    command.ui32Repeat = 0;
+    led_send(&command);
+}
+
+static void idle(char *pui8OutBuffer, size_t argc, char **argv)
+{
+    char *end_ptr;
+    uint32_t handle_id;
+    led_command_t command;
+
+    if (argc < 3)
+    {
+        am_util_stdio_printf("\r\nMissing LED handle id.\r\n");
+        help(pui8OutBuffer, argc, argv);
+        return;
+    }
+
+    handle_id = strtol(argv[2], &end_ptr, 10);
+    command.ui32Handle = handle_id;
+    command.ui32Id = LED_EFFECT_IDLE;
+    command.ui32Repeat = 0;
+    led_send(&command);
+}
+
 static void effect(char *pui8OutBuffer, size_t argc, char **argv)
 {
-    if (strcmp(argv[1], "off") == 0)
-    {
-        led_command_t command = { LED_COMMAND_OFF, 0 };
-        led_send(&command);
-    }
-    else if (strcmp(argv[1], "on") == 0)
-    {
-        led_command_t command = { LED_COMMAND_ON, 0 };
-        led_send(&command);
-    }
-    else if (strcmp(argv[1], "idle") == 0)
-    {
-        led_command_t command = { LED_COMMAND_IDLE, 0 };
-        led_send(&command);
-    }
-    else if (strcmp(argv[1], "effect") == 0)
-    {
-        uint32_t effect, repeat;
-        if (argc < 3)
-        {
-            help(pui8OutBuffer, argc, argv);
-            return;
-        }
+    char *end_ptr;
+    uint32_t handle_id;
+    led_command_t command;
 
-        if (strcmp(argv[2], "breathing") == 0)
-        {
-            effect = led_effect_id[LED_COMMAND_BREATHING];
-        }
-        else if (strcmp(argv[2], "pulse1") == 0)
-        {
-            effect = led_effect_id[LED_COMMAND_PULSE1];
-        }
-        else if (strcmp(argv[2], "pulse2") == 0)
-        {
-            effect = led_effect_id[LED_COMMAND_PULSE2];
-        }
-        else if (strcmp(argv[2], "pulse3") == 0)
-        {
-            effect = led_effect_id[LED_COMMAND_PULSE3];
-        }
-        else if (strcmp(argv[2], "sos") == 0)
-        {
-            effect = led_effect_id[LED_COMMAND_SOS];
-        }
-        else
-        {
-            help(pui8OutBuffer, argc, argv);
-            return;
-        }
+    if (argc < 3)
+    {
+        am_util_stdio_printf("\r\nMissing LED handle id.\r\n");
+        help(pui8OutBuffer, argc, argv);
+        return;
+    }
 
-        repeat = 0;
-        if (argc == 4)
-        {
-            repeat = strtol(argv[3], NULL, 10);
-        }
+    handle_id = strtol(argv[2], &end_ptr, 10);
+    command.ui32Handle = handle_id;
 
-        led_command_t command = { .ui32Id = effect, .ui32Repeat = repeat };
-        led_send(&command);
+    uint32_t effect, repeat;
+    if (argc < 4)
+    {
+        am_util_stdio_printf("\r\nMissing effect value.\r\n");
+        help(pui8OutBuffer, argc, argv);
+        return;
+    }
+
+    if (strcmp(argv[3], "breathing") == 0)
+    {
+        effect = led_effect_id[LED_EFFECT_BREATHING];
+    }
+    else if (strcmp(argv[3], "pulse1") == 0)
+    {
+        effect = led_effect_id[LED_EFFECT_PULSE1];
+    }
+    else if (strcmp(argv[3], "pulse2") == 0)
+    {
+        effect = led_effect_id[LED_EFFECT_PULSE2];
+    }
+    else if (strcmp(argv[3], "pulse3") == 0)
+    {
+        effect = led_effect_id[LED_EFFECT_PULSE3];
+    }
+    else if (strcmp(argv[3], "sos") == 0)
+    {
+        effect = led_effect_id[LED_EFFECT_SOS];
     }
     else
     {
+        am_util_stdio_printf("\r\nInvalid effect specified.\r\n");
         help(pui8OutBuffer, argc, argv);
+        return;
     }
+
+    repeat = 0;
+    if (argc == 5)
+    {
+        repeat = strtol(argv[4], NULL, 10);
+    }
+
+    command.ui32Handle = handle_id;
+    command.ui32Id = effect;
+    command.ui32Repeat = repeat;
+    led_send(&command);
 }
 
 portBASE_TYPE
@@ -169,9 +249,29 @@ led_task_cli_entry(char *pui8OutBuffer, size_t ui32OutBufferLength, const char *
     {
         help(pui8OutBuffer, argc, argv);
     }
-    else
+    else if (strcmp(argv[1], "list") == 0)
+    {
+        list(pui8OutBuffer, argc, argv);
+    }
+    else if (strcmp(argv[1], "off") == 0)
+    {
+        off(pui8OutBuffer, argc, argv);
+    }
+    else if (strcmp(argv[1], "on") == 0)
+    {
+        on(pui8OutBuffer, argc, argv);
+    }
+    else if (strcmp(argv[1], "idle") == 0)
+    {
+        idle(pui8OutBuffer, argc, argv);
+    }
+    else if (strcmp(argv[1], "effect") == 0)
     {
         effect(pui8OutBuffer, argc, argv);
+    }
+    else
+    {
+        help(pui8OutBuffer, argc, argv);
     }
 
     return pdFALSE;
